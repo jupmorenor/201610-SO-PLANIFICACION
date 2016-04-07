@@ -9,7 +9,7 @@ from . import Proceso
 class Admin(object):
 
 	def __init__(self):
-		self._PROCESOS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
+		self._PROCESOS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
 		self.procesos = []
 		self.proceso_actual = None
 		self.cantProcesos = 0
@@ -40,5 +40,5 @@ class Admin(object):
 			return True
 			
 	def enProceso(self):
-		return self.proceso_actual.activo()
+		return self.proceso_actual.activo() if self.proceso_actual else False
 		
