@@ -24,8 +24,8 @@ class Proceso(object):
 	def join(self):
 		self._proceso.join()
 		
-	def __repr__(self):
-		return self._proceso.__repr__()
+	def nombre(self):
+		return self._proceso.name
 	
 	def activo(self):
 		self._proceso.is_alive()

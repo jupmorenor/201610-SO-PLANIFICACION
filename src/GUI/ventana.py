@@ -3,8 +3,9 @@ Created on 2/04/2016
 @author: Juan pablo Moreno Rico - 20111020059
 '''
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel
-from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem
-from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt4.QtCore import Qt, QStringList
+from nucleo import Admin
 
 class Ventana(QWidget):
 
@@ -13,8 +14,9 @@ class Ventana(QWidget):
 		
 		self.iniciar = QPushButton("iniciar")
 		
-		self.tablaGantt = QTableWidget(15,15)
-		self.tablaDatos = QTableWidget(15,15)
+		self.tablaGantt = QTableWidget(5, 0)
+		self.tablaDatos = QTableWidget(0, 7)
+		self.contenedor = Admin()
 		
 		self._inicializar()
 	
@@ -84,7 +86,21 @@ class Ventana(QWidget):
 		self.setLayout(caja)
 		
 		self.setFixedSize(800, 600)
+		self._configurar()
 		self.show()
+		
+	def _configurar(self):
+		self.tablaGantt.setEditTriggers(QAbstractItemView.NoEditTriggers)
+		self.tablaGantt.setDragDropOverwriteMode(False)
+		nProcesos = [proceso.nombre() for proceso in self.contenedor.procesos]
+		self.tablaGantt.setVerticalHeaderLabels(QStringList(nProcesos))
+		
+		self.tablaDatos.setEditTriggers(QAbstractItemView.NoEditTriggers)
+		self.tablaDatos.setDragDropOverwriteMode(False)
+		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
+		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
+		for proceso in self.contenedor.procesos:
+			pass
 		
 		
 		
