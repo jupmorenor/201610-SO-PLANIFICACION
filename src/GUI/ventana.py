@@ -112,22 +112,22 @@ class Ventana(QWidget):
 			self.tablaDatos.setItem(j, 1, QTableWidgetItem(str(self.contenedor.procesos[j].llegada)))
 			self.tablaDatos.setItem(j, 2, QTableWidgetItem(str(self.contenedor.procesos[j].rafaga/100)))
 		
-		self.tablaGantt.setColumnCount(5)
-		for i in range(5):	
-			for j in range(self.contenedor.cantProcesos):
-				if i>=j:
-					item = QTableWidgetItem()
-					item.setBackgroundColor(Qt.red)
-					self.tablaGantt.setItem(j, i, item)
+		self.tablaGantt.insertColumn(0)
+		item = QTableWidgetItem()
+		item.setBackgroundColor(Qt.red)
+		self.tablaGantt.setItem(0, 0, item)
 		
 		self.tablaGantt.resizeColumnsToContents()
 		self.tablaDatos.resizeColumnsToContents()	
 	
 	def _comenzar(self):
-		while self.contenedor.cantProcesos < 10:
+		while self.contenedor.cantProcesos < 15:
+			if self.contenedor.procesos and not self.contenedor.enProceso():
+				self.contenedor.atenderProceso()
 			while self.contenedor.enProceso():
-				self.contenedor.terminarProceso()
-		
+				if self.contenedor.terminarProceso():
+					pass
+			self.contenedor.agregarProceso()
 		msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
 		
 		

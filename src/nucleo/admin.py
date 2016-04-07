@@ -16,13 +16,11 @@ class Admin(object):
 		self._inicializar()
 	
 	def _inicializar(self):
-		#random.seed()
-		for i in range(5):
-			proceso = Proceso(self._PROCESOS[self.cantProcesos])
-			proceso.llegada = round(clock())
-			self.procesos.append(proceso)
-			self.cantProcesos += 1
-			sleep(1)
+		proceso = Proceso(self._PROCESOS[self.cantProcesos])
+		proceso.llegada = round(clock())
+		self.procesos.append(proceso)
+		self.cantProcesos += 1
+		sleep(1)
 			
 	def agregarProceso(self):
 		if random()*100 > 50:
@@ -30,6 +28,7 @@ class Admin(object):
 			proceso.llegada = round(clock())
 			self.procesos.append(proceso)
 			self.cantProcesos += 1
+		sleep(1)
 	
 	def atenderProceso(self):
 		self.proceso_actual = self.procesos.pop(0)
@@ -38,6 +37,7 @@ class Admin(object):
 	def terminarProceso(self):
 		if self.proceso_actual.rafaga<0:
 			self.proceso_actual.join()
+			return True
 			
 	def enProceso(self):
 		return self.proceso_actual.activo()
