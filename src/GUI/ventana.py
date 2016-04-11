@@ -3,9 +3,9 @@ Created on 2/04/2016
 @author: Juan pablo Moreno Rico - 20111020059
 '''
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
-from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView
-from PyQt4.QtCore import Qt, QStringList
-from nucleo import Admin
+from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
+from PyQt4.QtCore import Qt, QStringList, QTimer
+from nucleo import FCFS
 
 class Ventana(QWidget):
 
@@ -16,8 +16,9 @@ class Ventana(QWidget):
 		
 		self.tablaGantt = QTableWidget()
 		self.tablaDatos = QTableWidget(0, 7)
-		self.contenedor = Admin()
-		
+		self.temporizador = QTimer(self)
+		self.contenedor = FCFS()
+		self.cant = 0
 		self.fila = 0
 		self.columna = 0
 		
@@ -97,6 +98,7 @@ class Ventana(QWidget):
 		
 	def _configurar(self):
 		self.iniciar.clicked.connect(self._comenzar)
+		self.temporizador.timeout.connect(self._actualizar)
 		self.tablaGantt.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.tablaGantt.setDragDropOverwriteMode(False)
 		
@@ -104,48 +106,57 @@ class Ventana(QWidget):
 		self.tablaDatos.setDragDropOverwriteMode(False)
 		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
 		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
-		"""
-		self.tablaDatos.insertRow(self.fila)
-	
-		for j in range(self.contenedor.cantProcesos):
-			self.tablaDatos.setItem(j, 0, QTableWidgetItem(self.contenedor.procesos[j].nombre()))
-			self.tablaDatos.setItem(j, 1, QTableWidgetItem(str(self.contenedor.procesos[j].llegada)))
-			self.tablaDatos.setItem(j, 2, QTableWidgetItem(str(self.contenedor.procesos[j].rafaga/100)))
-		
-		self.tablaGantt.insertColumn(self.columna)
-		item = QTableWidgetItem()
-		item.setBackgroundColor(Qt.green)
-		self.tablaGantt.setItem(self.fila, self.columna, item)
-		
-		self.fila += 1
-		self.columna += 1
-		
-		self.tablaGantt.resizeColumnsToContents()
-		self.tablaDatos.resizeColumnsToContents()
-		"""	
-	
+
 	def _comenzar(self):
-		while self.contenedor.cantProcesos < 7:
-			if self.contenedor.procesos and not self.contenedor.enProceso():
-				self.contenedor.atenderProceso()
-				self.tablaGantt.insertRow(self.fila)
-				self.tablaGantt.insertColumn(self.columna)
-				item = QTableWidgetItem()
-				item.setBackgroundColor(Qt.red)
-				self.tablaGantt.setItem(self.fila, self.columna, item)
-				self.tablaDatos.insertRow(self.fila)
-				self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(self.contenedor.proceso_actual.nombre()))
-				self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor.proceso_actual.llegada)))
-				self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.proceso_actual.rafaga/100)))
-				self.fila += 1
-				self.columna += 1
-			while self.contenedor.enProceso():
-				if self.contenedor.terminarProceso():
-					self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.proceso_actual.rafaga/100)))
+		self.cant, ok = QInputDialog.getInt(self, "Cantidad", "Indique la cantidad de procesos", min=0, max=50)
+		if ok:
+			self.temporizador.start(1000)
+	
+	def _actualizar(self):
+		#agregar procesos
+		if self.contenedor.cantProcesos < self.cant:
 			self.contenedor.agregarProceso()
+			
+			
 			self.tablaGantt.resizeColumnsToContents()
 			self.tablaDatos.resizeColumnsToContents()
-		msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
+		else:
+			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
+			self.temporizador.stop()
+			
+			
+		#iniciar primer proceso
+		
+		#obtener proceso finalizado
+		
+		#actualizar tablaGantt
+		
+		#actualizar tablaDatos
+		
+		
+		
+
+		if self.contenedor.procesos and not self.contenedor.enProceso():
+			self.contenedor.atenderProceso()
+			#---
+			self.tablaGantt.insertRow(self.fila)
+			self.tablaGantt.insertColumn(self.columna)
+			item = QTableWidgetItem()
+			item.setBackgroundColor(Qt.red)
+			self.tablaGantt.setItem(self.fila, self.columna, item)
+			#---
+			self.tablaDatos.insertRow(self.fila)
+			self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(self.contenedor.procesoActual().nombre()))
+			self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor.procesoActual().llegada)))
+			self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.procesoActual().rafaga/100)))
+			#---
+			self.fila += 1
+			self.columna += 1
+		if self.contenedor.enProceso():
+			if self.contenedor.terminarProceso():
+				self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.procesoActual().rafaga/100)))
+		
+		
 		
 		
 		

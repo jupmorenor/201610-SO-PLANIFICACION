@@ -11,9 +11,11 @@ class Proceso(object):
 		self._proceso = Process(name=nombre, target=self._tarea)
 		self.rafaga = randrange(2, 15)*100
 		self.llegada = 0
+		self.pausado = False
 	
 	def _tarea(self):
-		self.rafaga -= 1
+		if self.pausado:
+			self.rafaga -= 1
 		
 	def iniciar(self):
 		self._proceso.start()
