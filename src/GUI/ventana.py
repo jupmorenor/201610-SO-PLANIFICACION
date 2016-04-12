@@ -2,6 +2,7 @@
 Created on 2/04/2016
 @author: Juan pablo Moreno Rico - 20111020059
 '''
+from time import clock
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
@@ -19,6 +20,7 @@ class Ventana(QWidget):
 		self.temporizador = QTimer(self)
 		self.contenedor = FCFS()
 		self.cant = 0
+		self.terminados = 0
 		self.fila = 0
 		self.columna = 0
 		
@@ -113,50 +115,47 @@ class Ventana(QWidget):
 			self.temporizador.start(1000)
 	
 	def _actualizar(self):
-		#agregar procesos
+		momento = round(clock())
 		if self.contenedor.cantProcesos < self.cant:
-			self.contenedor.agregarProceso()
-			
-			
-			self.tablaGantt.resizeColumnsToContents()
-			self.tablaDatos.resizeColumnsToContents()
+			if self.contenedor.agregarProceso(momento):
+				self._actualizarDatosNuevo()
+				self.tablaGantt.insertRow(self.fila)
+				self.fila += 1
+			if self.contenedor.atenderProceso(momento):
+				pass
+			proceso = self.contenedor.terminarProceso(momento)
+			if proceso is not None:
+				self._actualizarDatosFinalizado(proceso)
+				self.terminados += 1
+			self._actualizarGantt()
 		else:
 			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
-			self.temporizador.stop()
-			
-			
-		#iniciar primer proceso
+			self.temporizador.stop()	
 		
-		#obtener proceso finalizado
-		
-		#actualizar tablaGantt
-		
-		#actualizar tablaDatos
-		
-		
-		
-
-		if self.contenedor.procesos and not self.contenedor.enProceso():
-			self.contenedor.atenderProceso()
-			#---
-			self.tablaGantt.insertRow(self.fila)
-			self.tablaGantt.insertColumn(self.columna)
+	def _actualizarGantt(self):
+		self.tablaGantt.insertColumn(self.columna)
+		self.columna += 1
+		for i in range(self.terminados, self.fila):
 			item = QTableWidgetItem()
-			item.setBackgroundColor(Qt.red)
-			self.tablaGantt.setItem(self.fila, self.columna, item)
-			#---
-			self.tablaDatos.insertRow(self.fila)
-			self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(self.contenedor.procesoActual().nombre()))
-			self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor.procesoActual().llegada)))
-			self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.procesoActual().rafaga/100)))
-			#---
-			self.fila += 1
-			self.columna += 1
-		if self.contenedor.enProceso():
-			if self.contenedor.terminarProceso():
-				self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.procesoActual().rafaga/100)))
+			if i == self.terminados:
+				item.setBackgroundColor(Qt.green)
+			else:
+				item.setBackgroundColor(Qt.red)
+			self.tablaGantt.setItem(i, self.columna, item)
+		self.tablaGantt.resizeColumnsToContents()
 		
-		
+	def _actualizarDatosNuevo(self):
+		self.tablaDatos.insertRow(self.fila)
+		self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(self.contenedor.nuevoProceso().nombre()))
+		self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor.nuevoProceso().llegada)))
+		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.nuevoProceso().rafaga)))
+		self.tablaDatos.resizeColumnsToContents()
+
+	def _actualizarDatosFinalizado(self, proceso):
+		self.tablaDatos.setItem(self.terminados, 3, QTableWidgetItem(str(proceso.comienzo)))
+		self.tablaDatos.setItem(self.terminados, 4, QTableWidgetItem(str(proceso.finalizacion)))
+		self.tablaDatos.setItem(self.terminados, 5, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
+		self.tablaDatos.setItem(self.terminados, 6, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
 		
 		
 		

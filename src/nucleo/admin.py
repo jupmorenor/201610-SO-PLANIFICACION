@@ -2,7 +2,6 @@
 Created on 6/04/2016
 @author: Juan Pablo Moreno - 20111020059
 '''
-from time import clock
 from random import random
 from . import Proceso
 
@@ -14,25 +13,37 @@ class FCFS(object):
 		self.procesos = []
 		self.cantProcesos = 0	
 
-	def agregarProceso(self):
+	def agregarProceso(self, momento):
 		if self.cantProcesos < 5 or random() < 0.4:
 			proceso = Proceso(self._PROCESOS[self.cantProcesos % len(self._PROCESOS)])
-			proceso.llegada = round(clock())
+			proceso.llegada = round(momento)
 			self.procesos.append(proceso)
 			self.cantProcesos += 1
+			return True
+		return False
 	
 	def procesoActual(self):
 		return self.procesos[0]
 	
-	def atenderProceso(self):
+	def nuevoProceso(self):
 		if self.procesos:
-			self.procesos[0].iniciar()
+			return self.procesos[len(self.procesos)-1] 
+	
+	def atenderProceso(self, momento):
+		if self.procesos:
+			if not self.enProceso():
+				self.procesos[0].iniciar()
+				self.procesos[0].comienzo = momento
+				return True
+		return False
 		
-	def terminarProceso(self):
+	def terminarProceso(self, momento):
 		if self.procesos:
-			if self.procesos[0].rafaga<0:
+			if not self.enProceso():
 				self.procesos[0].join()
+				self.procesos[0].finalizacion = momento
 				return self.procesos.pop(0)
+		return None
 			
 	def enProceso(self):
 		return self.procesos[0].activo() if self.procesos else False

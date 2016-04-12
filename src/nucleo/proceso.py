@@ -2,6 +2,7 @@
 Created on 5/04/2016
 @author: Juan Pablo Moreno - 20111020059
 '''
+from time import sleep
 from multiprocessing import Process
 from random import randrange
 
@@ -9,13 +10,15 @@ class Proceso(object):
 
 	def __init__(self, nombre):
 		self._proceso = Process(name=nombre, target=self._tarea)
-		self.rafaga = randrange(2, 15)*100
+		self.rafaga = randrange(2, 10)
 		self.llegada = 0
+		self.comienzo = 0
+		self.finalizacion = 0
 		self.pausado = False
 	
 	def _tarea(self):
-		if self.pausado:
-			self.rafaga -= 1
+		if not self.pausado:
+			sleep(self.rafaga)
 		
 	def iniciar(self):
 		self._proceso.start()
