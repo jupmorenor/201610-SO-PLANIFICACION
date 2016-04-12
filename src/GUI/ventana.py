@@ -134,10 +134,10 @@ class Ventana(QWidget):
 		else:
 			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
 			self.temporizador.stop()	
+			del msj
 		
 	def _actualizarGantt(self):
 		self.tablaGantt.insertColumn(self.columna)
-		self.columna += 1
 		for i in range(self.terminados, self.fila):
 			item = QTableWidgetItem()
 			if i == self.terminados:
@@ -145,6 +145,7 @@ class Ventana(QWidget):
 			else:
 				item.setBackgroundColor(Qt.red)
 			self.tablaGantt.setItem(i, self.columna, item)
+		self.columna += 1
 		self.tablaGantt.resizeColumnsToContents()
 		
 	def _actualizarDatosNuevo(self, proceso):
