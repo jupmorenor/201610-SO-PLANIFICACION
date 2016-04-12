@@ -117,17 +117,30 @@ class Ventana(QWidget):
 	def _actualizar(self):
 		momento = round(clock())
 		if self.contenedor.cantProcesos < self.cant:
+			proceso = self.contenedor.administrarProcesos(momento)
+			if proceso is not None:
+				if proceso.estado == "listo":
+					self._actualizarDatosNuevo(proceso)
+					self.tablaGantt.insertRow(self.fila)
+					self.fila += 1
+				elif proceso.estado == "terminado":
+					self._actualizarDatosFinalizado(proceso)
+					self.terminados += 1
+			self._actualizarGantt()
+					
+					
+			"""	
 			if self.contenedor.agregarProceso(momento):
 				self._actualizarDatosNuevo()
-				self.tablaGantt.insertRow(self.fila)
-				self.fila += 1
-			if self.contenedor.atenderProceso(momento):
-				pass
+				
+			if not self.contenedor.enProceso():
+				self.contenedor.atenderProceso(momento)
 			proceso = self.contenedor.terminarProceso(momento)
 			if proceso is not None:
 				self._actualizarDatosFinalizado(proceso)
 				self.terminados += 1
-			self._actualizarGantt()
+			"""
+			
 		else:
 			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
 			self.temporizador.stop()	
@@ -144,11 +157,11 @@ class Ventana(QWidget):
 			self.tablaGantt.setItem(i, self.columna, item)
 		self.tablaGantt.resizeColumnsToContents()
 		
-	def _actualizarDatosNuevo(self):
+	def _actualizarDatosNuevo(self, proceso):
 		self.tablaDatos.insertRow(self.fila)
-		self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(self.contenedor.nuevoProceso().nombre()))
-		self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor.nuevoProceso().llegada)))
-		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor.nuevoProceso().rafaga)))
+		self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(str(proceso.nombre)))
+		self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(proceso.llegada)))
+		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(proceso.rafaga)))
 		self.tablaDatos.resizeColumnsToContents()
 
 	def _actualizarDatosFinalizado(self, proceso):
