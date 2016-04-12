@@ -117,29 +117,19 @@ class Ventana(QWidget):
 	def _actualizar(self):
 		momento = round(clock())
 		if self.contenedor.cantProcesos < self.cant:
-			proceso = self.contenedor.administrarProcesos(momento)
+			proceso = self.contenedor.agregarProcesos(momento)
 			if proceso is not None:
 				if proceso.estado == "listo":
 					self._actualizarDatosNuevo(proceso)
 					self.tablaGantt.insertRow(self.fila)
 					self.fila += 1
-				elif proceso.estado == "terminado":
+		if self.contenedor.procesos:
+			proceso = self.contenedor.administrarProcesos(momento)
+			if proceso is not None:
+				if proceso.estado == "terminado":
 					self._actualizarDatosFinalizado(proceso)
 					self.terminados += 1
 			self._actualizarGantt()
-					
-					
-			"""	
-			if self.contenedor.agregarProceso(momento):
-				self._actualizarDatosNuevo()
-				
-			if not self.contenedor.enProceso():
-				self.contenedor.atenderProceso(momento)
-			proceso = self.contenedor.terminarProceso(momento)
-			if proceso is not None:
-				self._actualizarDatosFinalizado(proceso)
-				self.terminados += 1
-			"""
 			
 		else:
 			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
