@@ -6,19 +6,19 @@ from time import clock
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
-from nucleo import FCFS
+from nucleo import FCFS, SJF, SRTF
 
 class Ventana(QWidget):
 
 	def __init__(self):
 		super(Ventana, self).__init__()
-		
+		self.algoritmos = {"FCFS":FCFS, "SJF":SJF, "SRTF":SRTF, "Round Robin":None}
 		self.iniciar = QPushButton("INICIAR")
-		
+		self.bloquear = QPushButton("BLOQUEAR")
 		self.tablaGantt = QTableWidget()
 		self.tablaDatos = QTableWidget(0, 7)
 		self.temporizador = QTimer(self)
-		self.contenedor = FCFS()
+		self.contenedor = None
 		self.cant = 0
 		self.terminados = 0
 		self.fila = 0
@@ -27,7 +27,7 @@ class Ventana(QWidget):
 		self._inicializar()
 	
 	def _inicializar(self):
-		self.setWindowTitle("FCFS")
+		self.setWindowTitle("Algoritmos de planificacion ")
 		
 		#------------------------------------#
 		#	ELEMENTOS DEL PANEL SUPERIOR 	 #
@@ -63,6 +63,7 @@ class Ventana(QWidget):
 		fila3.addWidget(tituloI)
 		fila4.addWidget(self.tablaDatos)
 		fila5.addWidget(self.iniciar)
+		fila5.addWidget(self.bloquear)
 		
 		cajaInferior = QVBoxLayout()
 		
@@ -100,6 +101,8 @@ class Ventana(QWidget):
 		
 	def _configurar(self):
 		self.iniciar.clicked.connect(self._comenzar)
+		self.bloquear.clicked.connect(self._bloquear)
+		self.bloquear.setEnabled(False)
 		self.temporizador.timeout.connect(self._actualizar)
 		self.tablaGantt.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.tablaGantt.setDragDropOverwriteMode(False)
@@ -110,9 +113,19 @@ class Ventana(QWidget):
 		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
 
 	def _comenzar(self):
-		self.cant, ok = QInputDialog.getInt(self, "Cantidad", "Indique la cantidad de procesos", min=0, max=50)
-		if ok:
+		ok = 0
+		eleccion, ok1 = QInputDialog.getItem(self, "Algoritmos", "Seleccione un algoritmo", self.algoritmos.keys())
+		if ok1:
+			self.contenedor = self.algoritmos[str(eleccion)]()
+			self.cant, ok = QInputDialog.getInt(self, "Cantidad", "Indique la cantidad de procesos", min=0, max=50)
+		if ok and ok1:
+			self.setWindowTitle(self.windowTitle() + " --" +str(eleccion))
 			self.temporizador.start(1000)
+			self.iniciar.setEnabled(False)
+			self.bloquear.setEnabled(True)
+			
+	def _bloquear(self):
+		pass
 	
 	def _actualizar(self):
 		momento = round(clock())

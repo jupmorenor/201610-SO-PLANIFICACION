@@ -39,4 +39,20 @@ class SJF(FCFS):
 	
 	def __init__(self):
 		super(SJF, self).__init__()
+	
+	def administrarProcesos(self, momento):
+		return FCFS.administrarProcesos(self, momento)
+		
+		
+class SRTF(SJF):
+	
+	def __init__(self):
+		super(SRTF, self).__init__()
+
+
+class RoundRobin(SRTF):
+	
+	def __init__(self):
+		super(RoundRobin, self).__init__()
+	
 				
