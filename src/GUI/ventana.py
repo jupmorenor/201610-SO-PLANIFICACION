@@ -6,7 +6,7 @@ from time import clock
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
-from nucleo import FCFS, SJF, SRTF
+from nucleo import FCFS, SJF, SRTF, Proceso
 
 class Ventana(QWidget):
 
@@ -23,6 +23,7 @@ class Ventana(QWidget):
 		self.terminados = 0
 		self.fila = 0
 		self.columna = 0
+		self.bloqueo = False
 		
 		self._inicializar()
 	
@@ -125,7 +126,7 @@ class Ventana(QWidget):
 			self.bloquear.setEnabled(True)
 			
 	def _bloquear(self):
-		pass
+		self.bloqueo = True
 	
 	def _actualizar(self):
 		momento = round(clock())
@@ -138,9 +139,16 @@ class Ventana(QWidget):
 					self.fila += 1
 		if self.contenedor.procesos:
 			proceso = self.contenedor.administrarProcesos(momento)
-			if proceso is not None:
+			if self.bloqueo:
+				self.bloqueo = False
+			if isinstance(proceso, Proceso):
 				if proceso.estado == "terminado":
 					self._actualizarDatosFinalizado(proceso)
+					self.terminados += 1
+			elif isinstance(proceso, int):
+				if self.contenedor.procesos[proceso].estado == "terminado" and not self.contenedor.procesos[proceso].actualizado:
+					self._actualizarDatosFinalizado(self.contenedor.procesos[proceso])
+					self.contenedor.procesos[proceso].actualizado = True
 					self.terminados += 1
 			self._actualizarGantt()
 			
@@ -151,13 +159,27 @@ class Ventana(QWidget):
 		
 	def _actualizarGantt(self):
 		self.tablaGantt.insertColumn(self.columna)
-		for i in range(self.terminados, self.fila):
-			item = QTableWidgetItem()
-			if i == self.terminados:
-				item.setBackgroundColor(Qt.green)
-			else:
-				item.setBackgroundColor(Qt.red)
-			self.tablaGantt.setItem(i, self.columna, item)
+		if isinstance(self.contenedor, FCFS):
+			for i in range(self.terminados, self.fila):
+				item = QTableWidgetItem()
+				if self.contenedor.procesos[i - self.terminados].estado == "ejecutando":
+					item.setBackgroundColor(Qt.green)
+				elif self.contenedor.procesos[i - self.terminados].estado == "listo":
+					item.setBackgroundColor(Qt.red)
+				elif self.contenedor.procesos[i - self.terminados].estado == "bloqueado":
+					item.setBackgroundColor(Qt.blue)
+				self.tablaGantt.setItem(i, self.columna, item)		
+		elif isinstance(self.contenedor, SJF):
+			for i in range(self.contenedor.cantProcesos):
+				item = QTableWidgetItem()
+				if self.contenedor.procesos[i].estado == "ejecutando":
+					item.setBackgroundColor(Qt.green)
+				elif self.contenedor.procesos[i].estado == "listo":
+					item.setBackgroundColor(Qt.red)
+				elif self.contenedor.procesos[i].estado == "bloqueado":
+					item.setBackgroundColor(Qt.blue)
+				self.tablaGantt.setItem(i, self.columna, item)
+				
 		self.columna += 1
 		self.tablaGantt.resizeColumnsToContents()
 		

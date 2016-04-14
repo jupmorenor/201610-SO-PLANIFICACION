@@ -13,6 +13,7 @@ class Proceso(object):
 		self.comienzo = 0
 		self.finalizacion = 0
 		self.estado = "listo"
+		self.actualizado = False
 		
 	def iniciar(self, com):
 		self.estado = "ejecutando"
@@ -22,7 +23,7 @@ class Proceso(object):
 		self.estado = "terminado"
 		self.finalizacion = fin
 	
-	def pausar(self):
+	def bloquear(self):
 		self.estado = "bloqueado"
 	
 	def ejecutar(self):
