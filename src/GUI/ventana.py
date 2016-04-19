@@ -6,13 +6,13 @@ from time import clock
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
-from nucleo import FCFS, SJF, SRTF, Proceso
+from nucleo import SJF
 
 class Ventana(QWidget):
 
 	def __init__(self):
 		super(Ventana, self).__init__()
-		self.algoritmos = {"FCFS":FCFS, "SJF":SJF, "SRTF":SRTF, "Round Robin":None}
+		self.algoritmos = {"SJF":SJF}
 		self.iniciar = QPushButton("INICIAR")
 		self.bloquear = QPushButton("BLOQUEAR")
 		self.tablaGantt = QTableWidget()
@@ -143,7 +143,7 @@ class Ventana(QWidget):
 				self.bloqueo = False
 			if proceso or proceso==0:
 				if self.contenedor[proceso].estado == "terminado" and not self.contenedor[proceso].actualizado:
-					self._actualizarDatosFinalizado(self.contenedor[proceso])
+					self._actualizarDatosFinalizado(self.contenedor[proceso], proceso)
 					self.contenedor[proceso].actualizado = True
 					self.terminados += 1
 			self._actualizarGantt()
@@ -174,11 +174,11 @@ class Ventana(QWidget):
 		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(proceso.rafaga)))
 		self.tablaDatos.resizeColumnsToContents()
 
-	def _actualizarDatosFinalizado(self, proceso):
-		self.tablaDatos.setItem(self.terminados, 3, QTableWidgetItem(str(proceso.comienzo)))
-		self.tablaDatos.setItem(self.terminados, 4, QTableWidgetItem(str(proceso.finalizacion)))
-		self.tablaDatos.setItem(self.terminados, 5, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
-		self.tablaDatos.setItem(self.terminados, 6, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
+	def _actualizarDatosFinalizado(self, proceso, i):
+		self.tablaDatos.setItem(i, 3, QTableWidgetItem(str(proceso.comienzo)))
+		self.tablaDatos.setItem(i, 4, QTableWidgetItem(str(proceso.finalizacion)))
+		self.tablaDatos.setItem(i, 5, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
+		self.tablaDatos.setItem(i, 6, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
 		
 		
 		

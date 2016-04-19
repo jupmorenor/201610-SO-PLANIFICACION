@@ -5,7 +5,7 @@ Created on 6/04/2016
 from random import random
 from . import Proceso
 
-class FCFS(object):
+class SJF(object):
 	
 	def __init__(self):
 		self._PROCESOS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", \
@@ -22,10 +22,14 @@ class FCFS(object):
 		
 	def administrarProcesos(self, momento):
 		proceso = None
+		menor = 20
 		estados = [p.estado for p in self.procesos]
 		for p in self.procesos:
-			if "ejecutando" not in estados:
-				if p.estado == "listo":
+			if not p.estado == "terminado":
+				menor = min(menor, p.rafaga)
+		for p in self.procesos:
+			if "ejecutando" not in estados and "listo" in estados:
+				if menor == p.rafaga and p.estado == "listo":
 					p.iniciar(momento)
 			if p.estado == "ejecutando":
 				p.ejecutar()
@@ -40,41 +44,3 @@ class FCFS(object):
 	
 	def __getitem__(self, i):
 		return self.procesos[i]
-
-class SJF(FCFS):
-	
-	def __init__(self):
-		super(SJF, self).__init__()
-	
-	def administrarProcesos(self, momento):
-		proceso = None
-		menor = 20
-		estados = [p.estado for p in self.procesos]
-		for p in self.procesos:
-			if not p.estado == "terminado":
-				menor = min(menor, p.rafaga)
-		for p in self.procesos:
-			if "ejecutando" not in estados:
-				if menor == p.rafaga and p.estado == "listo":
-					p.iniciar(momento)
-			if p.estado == "ejecutando":
-				p.ejecutar()
-				if p.rafaga < 0:
-					p.finalizar(momento)
-			if p.estado == "terminado":
-				proceso = self.procesos.index(p)
-		return proceso
-		
-		
-class SRTF(SJF):
-	
-	def __init__(self):
-		super(SRTF, self).__init__()
-
-
-class RoundRobin(SRTF):
-	
-	def __init__(self):
-		super(RoundRobin, self).__init__()
-	
-				
