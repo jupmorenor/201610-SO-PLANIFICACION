@@ -140,10 +140,12 @@ class Ventana(QWidget):
 		self.tablaGantt.insertColumn(self.columna)
 		for i in range(self.terminados, self.fila):
 			item = QTableWidgetItem()
-			if i == self.terminados:
+			if self.contenedor.procesos[i - self.terminados].estado == "ejecutando":
 				item.setBackgroundColor(Qt.green)
-			else:
+			elif self.contenedor.procesos[i - self.terminados].estado == "listo":
 				item.setBackgroundColor(Qt.red)
+			elif self.contenedor.procesos[i - self.terminados].estado == "bloqueado":
+				item.setBackgroundColor(Qt.blue)
 			self.tablaGantt.setItem(i, self.columna, item)
 		self.columna += 1
 		self.tablaGantt.resizeColumnsToContents()

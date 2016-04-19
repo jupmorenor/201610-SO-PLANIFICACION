@@ -27,16 +27,9 @@ class FCFS(object):
 			if self.procesos[0].estado == "listo":
 				self.procesos[0].iniciar(momento)
 			if self.procesos[0].estado == "ejecutando":
-				if self.procesos[0].rafaga <= 0:
+				self.procesos[0].ejecutar()
+				if self.procesos[0].rafaga < 0:
 					self.procesos[0].finalizar(momento)
-				else:
-					self.procesos[0].ejecutar()
 			if self.procesos[0].estado == "terminado":
 				proceso = self.procesos.pop(0)
 		return proceso
-
-class SJF(FCFS):
-	
-	def __init__(self):
-		super(SJF, self).__init__()
-				

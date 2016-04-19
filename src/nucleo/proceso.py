@@ -23,7 +23,7 @@ class Proceso(object):
 		self.finalizacion = fin
 	
 	def pausar(self):
-		self.estado = "pausado"
+		self.estado = "bloqueado"
 	
 	def ejecutar(self):
 		self.rafaga -= 1
