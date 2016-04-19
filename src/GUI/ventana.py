@@ -110,7 +110,7 @@ class Ventana(QWidget):
 		
 		self.tablaDatos.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.tablaDatos.setDragDropOverwriteMode(False)
-		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA", "PRIORIDAD"]
+		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
 		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
 
 	def _comenzar(self):
@@ -137,7 +137,8 @@ class Ventana(QWidget):
 					self._actualizarDatosNuevo(proceso)
 					self.tablaGantt.insertRow(self.fila)
 					self.fila += 1
-		if self.contenedor.procesos:
+		estados = [p.estado for p in self.contenedor.procesos]
+		if self.contenedor.procesos and ("listo" in estados or "ejecutando" in estados):
 			proceso = self.contenedor.administrarProcesos(momento)
 			if self.bloqueo:
 				self.bloqueo = False
