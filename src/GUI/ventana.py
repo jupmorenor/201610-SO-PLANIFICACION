@@ -110,7 +110,7 @@ class Ventana(QWidget):
 		
 		self.tablaDatos.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.tablaDatos.setDragDropOverwriteMode(False)
-		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
+		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA", "PRIORIDAD"]
 		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
 
 	def _comenzar(self):
@@ -130,9 +130,9 @@ class Ventana(QWidget):
 	
 	def _actualizar(self):
 		momento = round(clock())
-		if self.contenedor.cantProcesos < self.cant:
+		if len(self.contenedor) < self.cant:
 			proceso = self.contenedor.agregarProcesos(momento)
-			if proceso is not None:
+			if proceso:
 				if proceso.estado == "listo":
 					self._actualizarDatosNuevo(proceso)
 					self.tablaGantt.insertRow(self.fila)
@@ -141,14 +141,10 @@ class Ventana(QWidget):
 			proceso = self.contenedor.administrarProcesos(momento)
 			if self.bloqueo:
 				self.bloqueo = False
-			if isinstance(proceso, Proceso):
-				if proceso.estado == "terminado":
-					self._actualizarDatosFinalizado(proceso)
-					self.terminados += 1
-			elif isinstance(proceso, int):
-				if self.contenedor.procesos[proceso].estado == "terminado" and not self.contenedor.procesos[proceso].actualizado:
-					self._actualizarDatosFinalizado(self.contenedor.procesos[proceso])
-					self.contenedor.procesos[proceso].actualizado = True
+			if proceso or proceso==0:
+				if self.contenedor[proceso].estado == "terminado" and not self.contenedor[proceso].actualizado:
+					self._actualizarDatosFinalizado(self.contenedor[proceso])
+					self.contenedor[proceso].actualizado = True
 					self.terminados += 1
 			self._actualizarGantt()
 			
@@ -159,27 +155,15 @@ class Ventana(QWidget):
 		
 	def _actualizarGantt(self):
 		self.tablaGantt.insertColumn(self.columna)
-		if isinstance(self.contenedor, FCFS):
-			for i in range(self.terminados, self.fila):
-				item = QTableWidgetItem()
-				if self.contenedor.procesos[i - self.terminados].estado == "ejecutando":
-					item.setBackgroundColor(Qt.green)
-				elif self.contenedor.procesos[i - self.terminados].estado == "listo":
-					item.setBackgroundColor(Qt.red)
-				elif self.contenedor.procesos[i - self.terminados].estado == "bloqueado":
-					item.setBackgroundColor(Qt.blue)
-				self.tablaGantt.setItem(i, self.columna, item)		
-		elif isinstance(self.contenedor, SJF):
-			for i in range(self.contenedor.cantProcesos):
-				item = QTableWidgetItem()
-				if self.contenedor.procesos[i].estado == "ejecutando":
-					item.setBackgroundColor(Qt.green)
-				elif self.contenedor.procesos[i].estado == "listo":
-					item.setBackgroundColor(Qt.red)
-				elif self.contenedor.procesos[i].estado == "bloqueado":
-					item.setBackgroundColor(Qt.blue)
-				self.tablaGantt.setItem(i, self.columna, item)
-				
+		for i in range(len(self.contenedor)):
+			item = QTableWidgetItem()
+			if self.contenedor[i].estado == "ejecutando":
+				item.setBackgroundColor(Qt.green)
+			elif self.contenedor[i].estado == "listo":
+				item.setBackgroundColor(Qt.red)
+			elif self.contenedor[i].estado == "bloqueado":
+				item.setBackgroundColor(Qt.blue)
+			self.tablaGantt.setItem(i, self.columna, item)
 		self.columna += 1
 		self.tablaGantt.resizeColumnsToContents()
 		
