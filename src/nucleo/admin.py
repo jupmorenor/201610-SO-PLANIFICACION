@@ -31,12 +31,13 @@ class SJF(object):
 			if "ejecutando" not in estados and "listo" in estados:
 				if menor == p.rafaga and p.estado == "listo":
 					p.iniciar(momento)
+					break
+		for p in self.procesos:
 			if p.estado == "ejecutando":
 				p.ejecutar()
 				if p.rafaga < 0:
 					p.finalizar(momento)
-			if p.estado == "terminado":
-				proceso = self.procesos.index(p)
+					proceso = self.procesos.index(p)
 		return proceso
 	
 	def __len__(self):
