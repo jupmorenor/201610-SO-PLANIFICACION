@@ -6,17 +6,17 @@ from time import clock
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
-from nucleo import SJF
+from nucleo import Prioridad
 
 class Ventana(QWidget):
 
 	def __init__(self):
 		super(Ventana, self).__init__()
-		self.algoritmos = {"SJF":SJF}
+		self.algoritmos = {"Prioridad":Prioridad}
 		self.iniciar = QPushButton("INICIAR")
 		self.bloquear = QPushButton("BLOQUEAR")
 		self.tablaGantt = QTableWidget()
-		self.tablaDatos = QTableWidget(0, 7)
+		self.tablaDatos = QTableWidget(0, 9)
 		self.temporizador = QTimer(self)
 		self.contenedor = None
 		self.cant = 0
@@ -110,7 +110,7 @@ class Ventana(QWidget):
 		
 		self.tablaDatos.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.tablaDatos.setDragDropOverwriteMode(False)
-		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
+		datos = ["PROCESO", "LLEGADA", "RAFAGA", "PRIORIDAD", "EDAD", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
 		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
 
 	def _comenzar(self):
@@ -148,6 +148,7 @@ class Ventana(QWidget):
 					self.contenedor[proceso].actualizado = True
 					self.terminados += 1
 			self._actualizarGantt()
+			self._actualizarDatosDinamicos()
 			
 		else:
 			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
@@ -167,19 +168,26 @@ class Ventana(QWidget):
 			self.tablaGantt.setItem(i, self.columna, item)
 		self.columna += 1
 		self.tablaGantt.resizeColumnsToContents()
-		
+
 	def _actualizarDatosNuevo(self, proceso):
 		self.tablaDatos.insertRow(self.fila)
 		self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(str(proceso.nombre)))
 		self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(proceso.llegada)))
 		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(proceso.rafaga)))
+		self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(proceso.prioridad)))
+		self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(proceso.edad)))
 		self.tablaDatos.resizeColumnsToContents()
 
+	def _actualizarDatosDinamicos(self):
+		for i in range(len(self.contenedor)):
+			self.tablaDatos.setItem(i, 3, QTableWidgetItem(str(self.contenedor[i].prioridad)))
+			self.tablaDatos.setItem(i, 4, QTableWidgetItem(str(self.contenedor[i].edad)))
+
 	def _actualizarDatosFinalizado(self, proceso, i):
-		self.tablaDatos.setItem(i, 3, QTableWidgetItem(str(proceso.comienzo)))
-		self.tablaDatos.setItem(i, 4, QTableWidgetItem(str(proceso.finalizacion)))
-		self.tablaDatos.setItem(i, 5, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
-		self.tablaDatos.setItem(i, 6, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
+		self.tablaDatos.setItem(i, 5, QTableWidgetItem(str(proceso.comienzo)))
+		self.tablaDatos.setItem(i, 6, QTableWidgetItem(str(proceso.finalizacion)))
+		self.tablaDatos.setItem(i, 7, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
+		self.tablaDatos.setItem(i, 8, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
 		
 		
 		

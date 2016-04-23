@@ -5,7 +5,7 @@ Created on 6/04/2016
 from random import random
 from . import Proceso
 
-class SJF(object):
+class Prioridad(object):
 	
 	def __init__(self):
 		self._PROCESOS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", \
@@ -20,16 +20,19 @@ class SJF(object):
 			return proceso
 		return None
 		
+		
 	def administrarProcesos(self, momento):
 		proceso = None
 		menor = 20
 		estados = [p.estado for p in self.procesos]
 		for p in self.procesos:
 			if not p.estado == "terminado":
-				menor = min(menor, p.rafaga)
+				menor = min(menor, p.prioridad)
 		for p in self.procesos:
-			if "ejecutando" not in estados and "listo" in estados:
-				if menor == p.rafaga and p.estado == "listo":
+			if not "ejecutando" in estados:
+				if menor < p.prioridad and p.estado == "ejecutando":
+					p.estado = "listo" # tenia doble igual
+				if menor == p.prioridad and p.estado == "listo":
 					p.iniciar(momento)
 					break
 		for p in self.procesos:
@@ -38,6 +41,11 @@ class SJF(object):
 				if p.rafaga < 0:
 					p.finalizar(momento)
 					proceso = self.procesos.index(p)
+			else:
+				if not p.prioridad == 1:
+					p.envejecer()
+				if p.edad <= 0 and p.prioridad > 1:
+					p.priorizar()
 		return proceso
 	
 	def __len__(self):

@@ -1,2 +1,2 @@
 from proceso import Proceso
-from admin import SJF
+from admin import Prioridad
