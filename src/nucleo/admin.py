@@ -24,17 +24,16 @@ class Prioridad(object):
 	def administrarProcesos(self, momento):
 		proceso = None
 		menor = 20
-		estados = [p.estado for p in self.procesos]
 		for p in self.procesos:
 			if not p.estado == "terminado":
 				menor = min(menor, p.prioridad)
 		for p in self.procesos:
-			if not "ejecutando" in estados:
-				if menor < p.prioridad and p.estado == "ejecutando":
-					p.estado = "listo" # tenia doble igual
-				if menor == p.prioridad and p.estado == "listo":
-					p.iniciar(momento)
-					break
+			if menor < p.prioridad and p.estado == "ejecutando":
+				p.estado = "listo" # tenia doble igual
+			estados = [p1.estado for p1 in self.procesos]
+			if menor == p.prioridad and p.estado == "listo" and not "ejecutando" in estados:
+				p.iniciar(momento)
+				break
 		for p in self.procesos:
 			if p.estado == "ejecutando":
 				p.ejecutar()

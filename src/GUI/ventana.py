@@ -123,7 +123,7 @@ class Ventana(QWidget):
 			self.setWindowTitle(self.windowTitle() + " --" +str(eleccion))
 			self.temporizador.start(1000)
 			self.iniciar.setEnabled(False)
-			self.bloquear.setEnabled(True)
+			#self.bloquear.setEnabled(True)
 			
 	def _bloquear(self):
 		self.bloqueo = True

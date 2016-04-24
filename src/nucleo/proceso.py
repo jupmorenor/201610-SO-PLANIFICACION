@@ -10,7 +10,7 @@ class Proceso(object):
 		self.nombre = nom
 		self.rafaga = randint(2, 10)
 		self.llegada = ll
-		self.comienzo = 0
+		self.comienzo = None
 		self.finalizacion = 0
 		self.estado = "listo"
 		self.actualizado = False
@@ -19,7 +19,8 @@ class Proceso(object):
 		
 	def iniciar(self, com):
 		self.estado = "ejecutando"
-		self.comienzo = com
+		if self.comienzo == None:
+			self.comienzo = com
 		
 	def finalizar(self, fin):
 		self.estado = "terminado"
