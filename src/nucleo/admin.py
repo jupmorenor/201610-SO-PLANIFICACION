@@ -12,24 +12,35 @@ class Prioridad(object):
 						"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 		self.procesos = []
 		self.actual = 0
+		self._inicializar()
+	
+	def _inicializar(self):
+		for i in range(5):
+			proceso = Proceso(self._PROCESOS[len(self.procesos) % len(self._PROCESOS)], 0)
+			self.procesos.append(proceso)
 	
 	def agregarProcesos(self, momento):
-		if len(self.procesos) < 5 or random() < 0.25:
+		if random() < 0.2:
 			proceso = Proceso(self._PROCESOS[len(self.procesos) % len(self._PROCESOS)], momento)
 			self.procesos.append(proceso)
 			return proceso
 		return None
 		
-		
-	def administrarProcesos(self, momento):
+	def administrarProcesos(self, momento, bloqueo):
 		proceso = None
 		menor = 20
+		for p in self.procesos:
+			if p.estado == "bloqueado":
+				p.alistar()
+		for p in self.procesos:
+			if bloqueo and p.estado == "ejecutando":
+				p.bloquear()
 		for p in self.procesos:
 			if not p.estado == "terminado":
 				menor = min(menor, p.prioridad)
 		for p in self.procesos:
 			if menor < p.prioridad and p.estado == "ejecutando":
-				p.estado = "listo" # tenia doble igual
+				p.alistar()
 			estados = [p1.estado for p1 in self.procesos]
 			if menor == p.prioridad and p.estado == "listo" and not "ejecutando" in estados:
 				p.iniciar(momento)
@@ -52,3 +63,4 @@ class Prioridad(object):
 	
 	def __getitem__(self, i):
 		return self.procesos[i]
+
