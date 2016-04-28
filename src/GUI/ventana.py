@@ -134,7 +134,7 @@ class Ventana(QWidget):
 		if momento < self.cant:
 			proceso = self.contenedor.agregarProcesos(momento)
 			if proceso:
-				if proceso.estado == "listo":
+				if proceso.listo():
 					self._actualizarDatosNuevo(proceso)
 					self.tablaGantt.insertRow(self.fila)
 					self.fila += 1
@@ -144,7 +144,7 @@ class Ventana(QWidget):
 			if self.bloqueo:
 				self.bloqueo = False
 			if proceso or proceso==0:
-				if self.contenedor[proceso].estado == "terminado" and not self.contenedor[proceso].actualizado:
+				if self.contenedor[proceso].terminado() and not self.contenedor[proceso].actualizado:
 					self._actualizarDatosFinalizado(self.contenedor[proceso], proceso)
 					self.contenedor[proceso].actualizado = True
 					self.terminados += 1
@@ -160,11 +160,11 @@ class Ventana(QWidget):
 		self.tablaGantt.insertColumn(self.columna)
 		for i in range(len(self.contenedor)):
 			item = QTableWidgetItem()
-			if self.contenedor[i].estado == "ejecutando":
+			if self.contenedor[i].ejecutando():
 				item.setBackgroundColor(Qt.green)
-			elif self.contenedor[i].estado == "listo":
+			elif self.contenedor[i].listo():
 				item.setBackgroundColor(Qt.red)
-			elif self.contenedor[i].estado == "bloqueado":
+			elif self.contenedor[i].bloqueado():
 				item.setBackgroundColor(Qt.blue)
 			self.tablaGantt.setItem(i, self.columna, item)
 		self.columna += 1
@@ -199,3 +199,5 @@ class Ventana(QWidget):
 			self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(self.contenedor[i].prioridad)))
 			self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(self.contenedor[i].edad)))
 			self.fila += 1
+		self.tablaDatos.resizeColumnsToContents()
+
