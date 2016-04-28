@@ -15,7 +15,7 @@ class Proceso(object):
 		self.estado = "listo"
 		self.actualizado = False
 		self.prioridad = randint(1,4)
-		self.edad = randint(4, 8)
+		self.edad = randint(15, 20)
 		
 	def iniciar(self, com):
 		self.estado = "ejecutando"
@@ -29,6 +29,9 @@ class Proceso(object):
 	def bloquear(self):
 		self.estado = "bloqueado"
 	
+	def alistar(self):
+		self.estado = "listo"
+	
 	def ejecutar(self):
 		self.rafaga -= 1
 		
@@ -38,5 +41,5 @@ class Proceso(object):
 	def priorizar(self):
 		self.prioridad -= 1
 		if self.prioridad > 1:
-			self.edad = randint(10, 15)
+			self.edad = randint(20, 25)
 		
