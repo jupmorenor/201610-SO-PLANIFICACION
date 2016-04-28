@@ -42,4 +42,15 @@ class Proceso(object):
 		self.prioridad -= 1
 		if self.prioridad > 1:
 			self.edad = randint(20, 25)
+	def listo(self):
+		return self.estado == "listo"
+	
+	def bloqueado(self):
+		return self.estado == "bloqueado"
+	
+	def terminado(self):
+		return self.estado == "terminado"
+	
+	def ejecutando(self):
+		return self.estado == "ejecutando"
 		
