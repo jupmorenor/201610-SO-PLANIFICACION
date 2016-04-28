@@ -30,23 +30,25 @@ class Prioridad(object):
 		proceso = None
 		menor = 20
 		for p in self.procesos:
-			if p.estado == "bloqueado":
+			if p.bloqueado():
 				p.alistar()
+				break
 		for p in self.procesos:
-			if bloqueo and p.estado == "ejecutando":
+			if bloqueo and p.ejecutando():
 				p.bloquear()
+				break
 		for p in self.procesos:
-			if not p.estado == "terminado":
+			if not p.terminado():
 				menor = min(menor, p.prioridad)
 		for p in self.procesos:
-			if menor < p.prioridad and p.estado == "ejecutando":
+			if menor < p.prioridad and p.ejecutando():
 				p.alistar()
 			estados = [p1.estado for p1 in self.procesos]
-			if menor == p.prioridad and p.estado == "listo" and not "ejecutando" in estados:
+			if menor == p.prioridad and p.listo() and not "ejecutando" in estados:
 				p.iniciar(momento)
 				break
 		for p in self.procesos:
-			if p.estado == "ejecutando":
+			if p.ejecutando():
 				p.ejecutar()
 				if p.rafaga < 0:
 					p.finalizar(momento)
