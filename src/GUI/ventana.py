@@ -15,7 +15,7 @@ class Ventana(QWidget):
 		self.algoritmos = {"Prioridad":Prioridad}
 		self.iniciar = QPushButton("INICIAR")
 		self.bloquear = QPushButton("BLOQUEAR")
-		self.tablaGantt = QTableWidget()
+		self.tablaGantt = QTableWidget(5, 0)
 		self.tablaDatos = QTableWidget(0, 9)
 		self.temporizador = QTimer(self)
 		self.contenedor = None
@@ -118,19 +118,20 @@ class Ventana(QWidget):
 		eleccion, ok1 = QInputDialog.getItem(self, "Algoritmos", "Seleccione un algoritmo", self.algoritmos.keys())
 		if ok1:
 			self.contenedor = self.algoritmos[str(eleccion)]()
-			self.cant, ok = QInputDialog.getInt(self, "Cantidad", "Indique la cantidad de procesos", min=0, max=50)
+			self.cant, ok = QInputDialog.getInt(self, "Duracion", "Indique la duracion de la simulacion", min=0, max=60)
 		if ok and ok1:
 			self.setWindowTitle(self.windowTitle() + " --" +str(eleccion))
 			self.temporizador.start(1000)
 			self.iniciar.setEnabled(False)
-			#self.bloquear.setEnabled(True)
+			self.bloquear.setEnabled(True)
+		self._inicializarDatos()
 			
 	def _bloquear(self):
 		self.bloqueo = True
 	
 	def _actualizar(self):
 		momento = round(clock())
-		if len(self.contenedor) < self.cant:
+		if momento < self.cant:
 			proceso = self.contenedor.agregarProcesos(momento)
 			if proceso:
 				if proceso.estado == "listo":
@@ -139,7 +140,7 @@ class Ventana(QWidget):
 					self.fila += 1
 		estados = [p.estado for p in self.contenedor.procesos]
 		if self.contenedor.procesos and ("listo" in estados or "ejecutando" in estados):
-			proceso = self.contenedor.administrarProcesos(momento)
+			proceso = self.contenedor.administrarProcesos(momento, self.bloqueo)
 			if self.bloqueo:
 				self.bloqueo = False
 			if proceso or proceso==0:
@@ -188,6 +189,13 @@ class Ventana(QWidget):
 		self.tablaDatos.setItem(i, 6, QTableWidgetItem(str(proceso.finalizacion)))
 		self.tablaDatos.setItem(i, 7, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
 		self.tablaDatos.setItem(i, 8, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
-		
-		
-		
+	
+	def _inicializarDatos(self):
+		for i in range(len(self.contenedor)):
+			self.tablaDatos.insertRow(self.fila)
+			self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(str(self.contenedor[i].nombre)))
+			self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor[i].llegada)))
+			self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor[i].rafaga)))
+			self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(self.contenedor[i].prioridad)))
+			self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(self.contenedor[i].edad)))
+			self.fila += 1
