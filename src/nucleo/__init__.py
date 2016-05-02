@@ -1,2 +1,2 @@
 from proceso import Proceso
-from admin import Prioridad
+from admin import RoundRobin
