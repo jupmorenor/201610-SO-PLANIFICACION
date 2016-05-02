@@ -12,7 +12,7 @@ class RoundRobin(object):
 						"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 		self.procesos = []
 		self.actual = 0
-		self.quantum = 3
+		self.quantum = 5
 		self.q = 0
 		self._inicializar()
 	
@@ -44,24 +44,24 @@ class RoundRobin(object):
 		
 		estados = [p1.estado for p1 in self.procesos]
 		i = self.actual % len(self.procesos)
-		if self.procesos:
-			if self.procesos[i].terminado():
-				self.actual += 1
-			if self.procesos[i].listo() and not "ejecutando" in estados:
-				self.procesos[i].iniciar(momento)
-			if self.procesos[i].ejecutando():
-				if self.q < self.quantum:
-					self.procesos[i].ejecutar()
-					self.q += 1
-					if self.procesos[i].rafaga < 0:
-						self.procesos[i].finalizar(momento)
-						self.actual += 1
-						self.q = 0
-						proceso = i
-				else:
-					self.procesos[i].alistar()
+		while self.procesos[i].terminado():
+			self.actual += 1
+			i+=1
+		if self.procesos[i].listo() and not "ejecutando" in estados:
+			self.procesos[i].iniciar(momento)
+		if self.procesos[i].ejecutando():
+			if self.q < self.quantum:
+				self.procesos[i].ejecutar()
+				self.q += 1
+				if self.procesos[i].rafaga < 0:
+					self.procesos[i].finalizar(momento)
 					self.actual += 1
-					self.q = 0					
+					self.q = 0
+					proceso = i
+			else:
+				self.procesos[i].alistar()
+				self.actual += 1
+				self.q = 0					
 		return proceso
 	
 	def __len__(self):
