@@ -6,17 +6,17 @@ from time import clock
 from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
-from nucleo import FCFS, SJF, SRTF, Proceso
+from nucleo import FCFS, SJF, SRTF, Prioridad, RoundRobin
 
 class Ventana(QWidget):
 
 	def __init__(self):
 		super(Ventana, self).__init__()
-		self.algoritmos = {"FCFS":FCFS, "SJF":SJF, "SRTF":SRTF, "Round Robin":None}
+		self.algoritmos = {"FCFS":FCFS, "SJF":SJF, "SRTF":SRTF, "Prioridad":Prioridad, "Round Robin":RoundRobin}
 		self.iniciar = QPushButton("INICIAR")
 		self.bloquear = QPushButton("BLOQUEAR")
-		self.tablaGantt = QTableWidget()
-		self.tablaDatos = QTableWidget(0, 7)
+		self.tablaGantt = QTableWidget(5, 0)
+		self.tablaDatos = QTableWidget(0, 9)
 		self.temporizador = QTimer(self)
 		self.contenedor = None
 		self.cant = 0
@@ -110,7 +110,7 @@ class Ventana(QWidget):
 		
 		self.tablaDatos.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		self.tablaDatos.setDragDropOverwriteMode(False)
-		datos = ["PROCESO", "LLEGADA", "RAFAGA", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
+		datos = ["PROCESO", "LLEGADA", "RAFAGA", "PRIORIDAD", "EDAD", "COMIENZO", "FINALIZACION", "RETORNO", "ESPERA"]
 		self.tablaDatos.setHorizontalHeaderLabels(QStringList(datos))
 
 	def _comenzar(self):
@@ -118,83 +118,88 @@ class Ventana(QWidget):
 		eleccion, ok1 = QInputDialog.getItem(self, "Algoritmos", "Seleccione un algoritmo", self.algoritmos.keys())
 		if ok1:
 			self.contenedor = self.algoritmos[str(eleccion)]()
-			self.cant, ok = QInputDialog.getInt(self, "Cantidad", "Indique la cantidad de procesos", min=0, max=50)
+			self.cant, ok = QInputDialog.getInt(self, "Duracion", "Indique la duracion de la simulacion", min=0, max=60)
 		if ok and ok1:
 			self.setWindowTitle(self.windowTitle() + " --" +str(eleccion))
 			self.temporizador.start(1000)
 			self.iniciar.setEnabled(False)
 			self.bloquear.setEnabled(True)
+		self._inicializarDatos()
 			
 	def _bloquear(self):
 		self.bloqueo = True
 	
 	def _actualizar(self):
 		momento = round(clock())
-		if self.contenedor.cantProcesos < self.cant:
+		if momento < self.cant:
 			proceso = self.contenedor.agregarProcesos(momento)
-			if proceso is not None:
-				if proceso.estado == "listo":
+			if proceso:
+				if proceso.listo():
 					self._actualizarDatosNuevo(proceso)
 					self.tablaGantt.insertRow(self.fila)
 					self.fila += 1
-		if self.contenedor.procesos:
-			proceso = self.contenedor.administrarProcesos(momento)
+		estados = [p.estado for p in self.contenedor.procesos]
+		if self.contenedor.procesos and ("listo" in estados or "ejecutando" in estados):
+			proceso = self.contenedor.administrarProcesos(momento, self.bloqueo)
 			if self.bloqueo:
 				self.bloqueo = False
-			if isinstance(proceso, Proceso):
-				if proceso.estado == "terminado":
-					self._actualizarDatosFinalizado(proceso)
-					self.terminados += 1
-			elif isinstance(proceso, int):
-				if self.contenedor.procesos[proceso].estado == "terminado" and not self.contenedor.procesos[proceso].actualizado:
-					self._actualizarDatosFinalizado(self.contenedor.procesos[proceso])
-					self.contenedor.procesos[proceso].actualizado = True
+			if proceso or proceso==0:
+				if self.contenedor[proceso].terminado() and not self.contenedor[proceso].actualizado:
+					self._actualizarDatosFinalizado(self.contenedor[proceso], proceso)
+					self.contenedor[proceso].actualizado = True
 					self.terminados += 1
 			self._actualizarGantt()
+			if isinstance(self.contenedor, Prioridad):
+				self._actualizarDatosDinamicos()
 			
 		else:
 			msj = QMessageBox.information(self, "Terminado", "El proceso de simulacion ha terminado")
 			self.temporizador.stop()	
-			del msj
+			del msj 
 		
 	def _actualizarGantt(self):
 		self.tablaGantt.insertColumn(self.columna)
-		if isinstance(self.contenedor, FCFS):
-			for i in range(self.terminados, self.fila):
-				item = QTableWidgetItem()
-				if self.contenedor.procesos[i - self.terminados].estado == "ejecutando":
-					item.setBackgroundColor(Qt.green)
-				elif self.contenedor.procesos[i - self.terminados].estado == "listo":
-					item.setBackgroundColor(Qt.red)
-				elif self.contenedor.procesos[i - self.terminados].estado == "bloqueado":
-					item.setBackgroundColor(Qt.blue)
-				self.tablaGantt.setItem(i, self.columna, item)		
-		elif isinstance(self.contenedor, SJF):
-			for i in range(self.contenedor.cantProcesos):
-				item = QTableWidgetItem()
-				if self.contenedor.procesos[i].estado == "ejecutando":
-					item.setBackgroundColor(Qt.green)
-				elif self.contenedor.procesos[i].estado == "listo":
-					item.setBackgroundColor(Qt.red)
-				elif self.contenedor.procesos[i].estado == "bloqueado":
-					item.setBackgroundColor(Qt.blue)
-				self.tablaGantt.setItem(i, self.columna, item)
-				
+		for i in range(len(self.contenedor)):
+			item = QTableWidgetItem()
+			if self.contenedor[i].ejecutando():
+				item.setBackgroundColor(Qt.green)
+			elif self.contenedor[i].listo():
+				item.setBackgroundColor(Qt.red)
+			elif self.contenedor[i].bloqueado():
+				item.setBackgroundColor(Qt.blue)
+			self.tablaGantt.setItem(i, self.columna, item)
 		self.columna += 1
 		self.tablaGantt.resizeColumnsToContents()
-		
+
 	def _actualizarDatosNuevo(self, proceso):
 		self.tablaDatos.insertRow(self.fila)
 		self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(str(proceso.nombre)))
 		self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(proceso.llegada)))
 		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(proceso.rafaga)))
+		self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(proceso.prioridad)))
+		self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(proceso.edad)))
 		self.tablaDatos.resizeColumnsToContents()
 
-	def _actualizarDatosFinalizado(self, proceso):
-		self.tablaDatos.setItem(self.terminados, 3, QTableWidgetItem(str(proceso.comienzo)))
-		self.tablaDatos.setItem(self.terminados, 4, QTableWidgetItem(str(proceso.finalizacion)))
-		self.tablaDatos.setItem(self.terminados, 5, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
-		self.tablaDatos.setItem(self.terminados, 6, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
-		
-		
-		
+	def _actualizarDatosDinamicos(self):
+		for i in range(len(self.contenedor)):
+			self.tablaDatos.setItem(i, 3, QTableWidgetItem(str(self.contenedor[i].prioridad)))
+			self.tablaDatos.setItem(i, 4, QTableWidgetItem(str(self.contenedor[i].edad)))
+
+	def _actualizarDatosFinalizado(self, proceso, i):
+		self.tablaDatos.setItem(i, 5, QTableWidgetItem(str(proceso.comienzo)))
+		self.tablaDatos.setItem(i, 6, QTableWidgetItem(str(proceso.finalizacion)))
+		self.tablaDatos.setItem(i, 7, QTableWidgetItem(str(proceso.finalizacion - proceso.llegada)))
+		self.tablaDatos.setItem(i, 8, QTableWidgetItem(str(proceso.comienzo - proceso.llegada)))
+	
+	def _inicializarDatos(self):
+		for i in range(len(self.contenedor)):
+			self.tablaDatos.insertRow(self.fila)
+			self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(str(self.contenedor[i].nombre)))
+			self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(self.contenedor[i].llegada)))
+			self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(self.contenedor[i].rafaga)))
+			if isinstance(self.contenedor, Prioridad):
+				self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(self.contenedor[i].prioridad)))
+				self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(self.contenedor[i].edad)))
+			self.fila += 1
+		self.tablaDatos.resizeColumnsToContents()
+	
