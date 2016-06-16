@@ -176,8 +176,9 @@ class Ventana(QWidget):
 		self.tablaDatos.setItem(self.fila, 0, QTableWidgetItem(str(proceso.nombre)))
 		self.tablaDatos.setItem(self.fila, 1, QTableWidgetItem(str(proceso.llegada)))
 		self.tablaDatos.setItem(self.fila, 2, QTableWidgetItem(str(proceso.rafaga)))
-		self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(proceso.prioridad)))
-		self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(proceso.edad)))
+		if isinstance(self.contenedor, Prioridad):
+			self.tablaDatos.setItem(self.fila, 3, QTableWidgetItem(str(proceso.prioridad)))
+			self.tablaDatos.setItem(self.fila, 4, QTableWidgetItem(str(proceso.edad)))
 		self.tablaDatos.resizeColumnsToContents()
 
 	def _actualizarDatosDinamicos(self):
