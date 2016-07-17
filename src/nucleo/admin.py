@@ -25,7 +25,7 @@ class _Administrador(object):
 	def agregarProcesos(self, momento):
 		if random() < 0.2:
 			if self._prior:
-				proceso = ProcesoPriorizable(self._PROCESOS[len(self.procesos) % len(self._PROCESOS)], 0.0)
+				proceso = ProcesoPriorizable(self._PROCESOS[len(self.procesos) % len(self._PROCESOS)], momento)
 			else:
 				proceso = Proceso(self._PROCESOS[len(self.procesos) % len(self._PROCESOS)], momento)
 			self.procesos.append(proceso)
@@ -196,4 +196,4 @@ class RoundRobin(FCFS):
 				self.actual += 1
 				self.q = 0					
 		return proceso
-	
+

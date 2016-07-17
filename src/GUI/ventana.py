@@ -96,7 +96,7 @@ class Ventana(QWidget):
 		#agregar el layout a la ventana
 		self.setLayout(caja)
 		
-		self.setFixedSize(800, 600)
+		self.setFixedSize(1024, 768)
 		self._configurar()
 		self.show()
 		
