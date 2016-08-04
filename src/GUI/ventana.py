@@ -3,16 +3,16 @@ Created on 2/04/2016
 @author: Juan pablo Moreno Rico - 20111020059
 '''
 from time import clock
-from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox
+from PyQt4.QtGui import QWidget, QFrame, QSplitter, QHBoxLayout, QVBoxLayout, QLabel, QMessageBox, QColor
 from PyQt4.QtGui import QPushButton, QTableWidget, QTableWidgetItem, QAbstractItemView, QInputDialog
 from PyQt4.QtCore import Qt, QStringList, QTimer
-from nucleo import Prioridad
+from nucleo import MulticolasRetro
 
 class Ventana(QWidget):
 
 	def __init__(self):
 		super(Ventana, self).__init__()
-		self.algoritmos = {"Prioridad":Prioridad}
+		self.algoritmos = {"Colas multiples retroalimentadas":MulticolasRetro}
 		self.iniciar = QPushButton("INICIAR")
 		self.bloquear = QPushButton("BLOQUEAR")
 		self.tablaGantt = QTableWidget(5, 0)
@@ -96,7 +96,7 @@ class Ventana(QWidget):
 		#agregar el layout a la ventana
 		self.setLayout(caja)
 		
-		self.setFixedSize(800, 600)
+		self.setFixedSize(1900, 1000)
 		self._configurar()
 		self.show()
 		
@@ -161,9 +161,19 @@ class Ventana(QWidget):
 		for i in range(len(self.contenedor)):
 			item = QTableWidgetItem()
 			if self.contenedor[i].ejecutando():
-				item.setBackgroundColor(Qt.green)
+				if self.contenedor[i].prioridad == 1:
+					item.setBackgroundColor(QColor(0,128,0))
+				elif self.contenedor[i].prioridad == 2:
+					item.setBackgroundColor(Qt.green)
+				elif self.contenedor[i].prioridad == 3:
+					item.setBackgroundColor(QColor(128,255,128))
 			elif self.contenedor[i].listo():
-				item.setBackgroundColor(Qt.red)
+				if self.contenedor[i].prioridad == 1:
+					item.setBackgroundColor(QColor(128,0,0))
+				elif self.contenedor[i].prioridad == 2:
+					item.setBackgroundColor(Qt.red)
+				elif self.contenedor[i].prioridad == 3:
+					item.setBackgroundColor(QColor(255,128,128))
 			elif self.contenedor[i].bloqueado():
 				item.setBackgroundColor(Qt.blue)
 			self.tablaGantt.setItem(i, self.columna, item)

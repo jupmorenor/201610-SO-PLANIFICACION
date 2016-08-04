@@ -8,14 +8,14 @@ class Proceso(object):
 	
 	def __init__(self, nom, ll):
 		self.nombre = nom
-		self.rafaga = randint(2, 10)
+		self.rafaga = randint(2, 15)
 		self.llegada = ll
 		self.comienzo = None
 		self.finalizacion = 0
 		self.estado = "listo"
 		self.actualizado = False
-		self.prioridad = randint(1,4)
-		self.edad = randint(15, 20)
+		self.prioridad = 1
+		self.edad = 0
 		
 	def iniciar(self, com):
 		self.estado = "ejecutando"
@@ -41,7 +41,12 @@ class Proceso(object):
 	def priorizar(self):
 		self.prioridad -= 1
 		if self.prioridad > 1:
-			self.edad = randint(20, 25)
+			self.edad = randint(10, 30)
+			
+	def degradar(self):
+		self.prioridad += 1
+		self.edad = randint(10, 30)
+			
 	def listo(self):
 		return self.estado == "listo"
 	
