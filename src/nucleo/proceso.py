@@ -8,7 +8,7 @@ class Proceso(object):
 	
 	def __init__(self, nom, ll):
 		self.nombre = nom
-		self.rafaga = randint(2, 10)
+		self.rafaga = randint(2, 15)
 		self.llegada = ll
 		self.comienzo = None
 		self.finalizacion = 0
@@ -61,5 +61,20 @@ class ProcesoPriorizable(Proceso):
 		if self.prioridad > 1:
 			self.edad = randint(20, 25)
 
+class ProcesoPriorizableMulticolas(ProcesoPriorizable):
+	
+	def __init__(self, nom, ll):
+		super(ProcesoPriorizableMulticolas, self).__init__(nom, ll)
+		self.prioridad = 1
+		self.edad = 0
+	
+	def priorizar(self):
+		self.prioridad -= 1
+		if self.prioridad > 1:
+			self.edad = randint(10, 30)
+	
+	def degradar(self):
+		self.prioridad += 1
+		self.edad = randint(10, 30)
 
 		

@@ -1,2 +1,2 @@
-from proceso import Proceso, ProcesoPriorizable
-from admin import FCFS, SJF, SRTF, Prioridad, RoundRobin
+from proceso import Proceso, ProcesoPriorizable, ProcesoPriorizableMulticolas
+from admin import FCFS, SJF, SRTF, Prioridad, RoundRobin, MulticolasRetro
