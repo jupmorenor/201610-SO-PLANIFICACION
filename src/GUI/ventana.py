@@ -162,19 +162,25 @@ class Ventana(QWidget):
 		for i in range(len(self.contenedor)):
 			item = QTableWidgetItem()
 			if self.contenedor[i].ejecutando():
-				if self.contenedor[i].prioridad == 1:
-					item.setBackgroundColor(QColor(0,128,0))
-				elif self.contenedor[i].prioridad == 2:
-					item.setBackgroundColor(QColor(0,255,0))
-				elif self.contenedor[i].prioridad == 3:
-					item.setBackgroundColor(QColor(128,255,128))
+				if isinstance(self.contenedor, MulticolasRetro):
+					if self.contenedor[i].prioridad == 1:
+						item.setBackgroundColor(QColor(0,128,0))
+					elif self.contenedor[i].prioridad == 2:
+						item.setBackgroundColor(QColor(0,255,0))
+					elif self.contenedor[i].prioridad == 3:
+						item.setBackgroundColor(QColor(128,255,128))
+				else:
+					item.setBackgroundColor(Qt.green) 
 			elif self.contenedor[i].listo():
-				if self.contenedor[i].prioridad == 1:
-					item.setBackgroundColor(QColor(128,0,0))
-				elif self.contenedor[i].prioridad == 2:
-					item.setBackgroundColor(QColor(255,0,0))
-				elif self.contenedor[i].prioridad == 3:
-					item.setBackgroundColor(QColor(255,128,128))
+				if isinstance(self.contenedor, MulticolasRetro):
+					if self.contenedor[i].prioridad == 1:
+						item.setBackgroundColor(QColor(128,0,0))
+					elif self.contenedor[i].prioridad == 2:
+						item.setBackgroundColor(QColor(255,0,0))
+					elif self.contenedor[i].prioridad == 3:
+						item.setBackgroundColor(QColor(255,128,128))
+				else:
+					item.setBackgroundColor(Qt.red) 
 			elif self.contenedor[i].bloqueado():
 				item.setBackgroundColor(Qt.blue)
 			self.tablaGantt.setItem(i, self.columna, item)
